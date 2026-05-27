@@ -1,28 +1,74 @@
 
 import customtkinter as ctk
+import tifffile as tifffile
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+
+
+class EntryPanel(ctk.CTkFrame) : 
+    
+    def __init__(self, master, default=0, **kwargs):
+        super().__init__(master, **kwargs)
+        self.entry_var = ctk.StringVar(value=str(default))
+        ctk.CTkEntry(self, 
+                     bg_color="transparent", 
+                     textvariable=self.entry_var).pack()
 
 class ButtonPanel(ctk.CTkFrame):
     def __init__(self, master=None, command=None, text=None, **kwargs):
         super().__init__(master)
         self.master = master
-        self.pack()
         self.create_widgets(command, text=text, **kwargs)
 
     def create_widgets(self, command=None, **kwargs):
         self.import_button = ctk.CTkButton(self, command=command, **kwargs)
         self.import_button.pack()
 
-class FigurePanel(ctk.CTkFrame):
-    def __init__(self, master=None):
-        super().__init__(master)
-        self.master = master
-        self.pack()
-        self.create_widgets()
 
-    def create_widgets(self, im1, im2, **kwargs):
-        self.fig, self.axes = plt.subplots(1, 2, figsize=(10, 5), **kwargs)
-        self.axes[0].imshow(im1, cmap='gray')
-        self.axes[0].set_title("Original image")
 
-        self.axes[1].imshow(im2, cmap='gray')
-        self.axes[1].set_title("Binarized image")
+class ImagePanel(ctk.CTkFrame):
+
+    def __init__(self, master, image_path=None, Z=0, t=0, **kwargs):
+        super().__init__(master, **kwargs)
+        self.Z = Z
+        self.t = t
+        self.stack = tifffile.imread(image_path) if image_path else None
+        
+        if self.stack is None : 
+            print("No image stack loaded.")
+        else :
+            # Construction unique de la figure et du canvas
+            self.fig, self.ax = plt.subplots(figsize=(8,8))
+            self.fig.tight_layout(pad=0)
+            self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+            self.canvas.get_tk_widget().pack(fill="both", expand=True)
+
+            print(f"ImagePanel initialized with image_path: {image_path}, Z: {Z}, t: {t}")
+
+            self._render(self.Z, self.t)  # premier rendu
+
+    def _render(self, Z, t):
+        """Efface et redessine selon self.channels."""
+        if self.stack is None:
+            print("No image stack to render.")
+            self.ax.clear()
+            self.ax.text(0.5, 0.5, "No image loaded", ha="center", va="center", fontsize=12)
+            self.ax.axis("off")
+            self.canvas.draw()
+            return
+        else :
+            print("AAAAAAAA")
+            self.Z = Z
+            self.t = t
+            self.ax.clear()
+            self.ax.axis("off")
+            img = self.stack[self.t, self.Z, 0, :, :]
+
+            self.ax.imshow(img, cmap="gray")
+
+
+            self.fig.tight_layout(pad=0)
+            self.canvas.draw()
+            print(f"Rendered image for Z={self.Z} and t={self.t}")
+
