@@ -25,6 +25,26 @@ class ButtonPanel(ctk.CTkFrame):
         self.import_button = ctk.CTkButton(self, command=command, **kwargs)
         self.import_button.pack()
 
+class LabelPanel(ctk.CTkFrame):
+    def __init__(self, master=None, text=None, **kwargs):
+        super().__init__(master)
+        self.master = master
+        self.create_widgets(text=text, **kwargs)
+
+    def create_widgets(self, text=None, **kwargs):
+        self.label = ctk.CTkLabel(self, text=text, **kwargs)
+        self.label.pack()
+
+class SliderPanel(ctk.CTkFrame):
+    def __init__(self, master=None, from_=0, to=100, command=None, **kwargs):
+        super().__init__(master)
+        self.master = master
+        self.create_widgets(from_, to, command, **kwargs)
+
+    def create_widgets(self, from_, to, command=None, **kwargs):
+        self.slider = ctk.CTkSlider(self, from_=from_, to=to, command=command, **kwargs)
+        self.slider.pack(fill="x", expand=True)
+
 
 
 class ImagePanel(ctk.CTkFrame):
