@@ -83,7 +83,12 @@ class ImagePanel(ctk.CTkFrame):
             self.t = t
             self.ax.clear()
             self.ax.axis("off")
-            img = self.stack[self.t, self.Z, 0, :, :]
+            print(self.stack.shape)
+            print(len(self.stack.shape))
+            if len(self.stack.shape) < 5:
+                img = self.stack[self.t, self.Z, :, :]
+            else : 
+                img = self.stack[self.t, self.Z, 0, :, :]
 
             self.ax.imshow(img, cmap="gray")
 

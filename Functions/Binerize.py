@@ -22,4 +22,4 @@ def binerize(filename):
             stack_fluo_bin[i, j, :, :] = bin_im
         print(f"Processed frame {i+1}/{stack_fluo.shape[0]}")
     
-    return stack_fluo_bin, filename
+    return stack_fluo_bin
