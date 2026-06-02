@@ -1,10 +1,7 @@
-
 import customtkinter as ctk
 import tifffile as tifffile
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
-
 
 class EntryPanel(ctk.CTkFrame) : 
     
@@ -51,6 +48,8 @@ class ImagePanel(ctk.CTkFrame):
 
     def __init__(self, master, image_path=None, Z=0, t=0, **kwargs):
         super().__init__(master, **kwargs)
+        
+        self.number_plot = 1
         self.Z = Z
         self.t = t
         self.stack = tifffile.imread(image_path) if image_path else None
@@ -70,6 +69,8 @@ class ImagePanel(ctk.CTkFrame):
 
     def _render(self, Z, t):
         """Efface et redessine selon self.channels."""
+        self.Z = Z
+        self.t = t
         if self.stack is None:
             print("No image stack to render.")
             self.ax.clear()
@@ -78,22 +79,52 @@ class ImagePanel(ctk.CTkFrame):
             self.canvas.draw()
             return
         else :
-            print("AAAAAAAA")
-            self.Z = Z
-            self.t = t
-            self.ax.clear()
-            self.ax.axis("off")
-            print(self.stack.shape)
-            print(len(self.stack.shape))
-            if len(self.stack.shape) < 5:
-                img = self.stack[self.t, self.Z, :, :]
-            else : 
-                img = self.stack[self.t, self.Z, 0, :, :]
+            if self.number_plot == 1:
+                self.ax.clear()
+                self.ax.axis("off")
+                print(self.stack.shape)
+                print(len(self.stack.shape))
+                if len(self.stack.shape) < 5:
+                    img = self.stack[t, Z, :, :]
+                else : 
+                    img = self.stack[t, Z, 0, :, :]
 
-            self.ax.imshow(img, cmap="gray")
+                self.ax.imshow(img, cmap="gray")
+                self.fig.tight_layout(pad=0)
+                self.canvas.draw()
+                print(f"Rendered image for Z={self.Z} and t={self.t}")
+            else :
+                self._render_2_plots(self.Z, self.t)
+
+    def _render_2_plots(self, Z, t):
+        self.fig.clf()  # Clear the current figure
+        self.ax = self.fig.add_subplot(121)  # Add a subplot for the original
+        self.ax.imshow(self.stack[self.t, self.Z, 0, :, :], cmap='gray')  # Display the original image
+        self.ax.axis('off')  # Hide axes
+        self.fig.tight_layout(pad=0)  # Adjust layout
+        self.ax = self.fig.add_subplot(122)  # Add a subplot for the binarized image
+        self.ax.imshow(self.binarized_image[self.t, self.Z, :, :], cmap='gray')  # Display the binarized image
+        self.ax.axis('off')  # Hide axes
+        self.fig.tight_layout(pad=0)  # Adjust layout
+        self.canvas.draw()  # Redraw the canvas
+        print(f"Rendered original and binarized images for Z={self.Z} and t={self.t}")
 
 
-            self.fig.tight_layout(pad=0)
-            self.canvas.draw()
-            print(f"Rendered image for Z={self.Z} and t={self.t}")
+    def show_binarized_image(self, bin_image, t, Z):
+        self.binarized_image = bin_image
+        self.number_plot = 2
+        print("Binarized image ready to be displayed.")
+        self.fig.clf()  # Clear the current figure
+        print(f"Shape of original image: {self.stack.shape}")
+        self.ax = self.fig.add_subplot(121)  # Add a subplot for the original
+        self.ax.imshow(self.stack[t, Z, 0, :, :], cmap='gray')  # Display the original image
+        self.ax.axis('off')  # Hide axes
+        self.fig.tight_layout(pad=0)  # Adjust layout
+        self.ax = self.fig.add_subplot(122)  # Add a subplot for the bin
+        print(f"Shape of binarized image: {self.binarized_image.shape}")
+        self.ax.imshow(self.binarized_image[t, Z, :, :], cmap='gray')  # Display the binarized image
+        self.ax.axis('off')  # Hide axes
+        self.fig.tight_layout(pad=0)  # Adjust layout
+        self.canvas.draw()  # Redraw the canvas
+        print(f"Displayed binarized image for Z={self.Z} and t={self.t}")
 

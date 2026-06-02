@@ -28,10 +28,10 @@ class Application(ctk.CTk):
         self.erase_button = ButtonPanel(self, command=self.erase_figure, text="Erase figure")
         self.z_text = LabelPanel(self, text="Z:")
         self.t_text = LabelPanel(self, text="t:")
-        self.alpha_text = LabelPanel(self, text="Alpha:")
+
         self.Z_slider = SliderPanel(self, from_=0, to=2, command=self.update_Z)   
         self.t_slider = SliderPanel(self, from_=0, to=2, command=self.update_t)
-        self.alpha_entry = EntryPanel(self, default=self.alpha) 
+
 
         #self.wildth_entry = EntryPanel(self, default=self.wildth)
         
@@ -45,18 +45,12 @@ class Application(ctk.CTk):
         self.import_button.grid(row=0, column=0, padx=10, pady=10)
         self.erase_button.grid(row=0, column=1, padx=10, pady=10)
         self.Z_slider.grid(row=1, column=1, padx=10, pady=10)
-        self.alpha_entry.grid(row=1, column=3, padx=10, pady=10)
+
         self.t_slider.grid(row=2, column=1, padx=10, pady=10)
         self.z_text.grid(row=1, column=0, padx=10, pady=10)
         self.t_text.grid(row=2, column=0, padx=10, pady=10)
-        self.alpha_text.grid(row=1, column=2, padx=10, pady=10)
+
         self.run_button.grid(row=3, column=2, padx=10, pady=10)
-
-
-
-    
-
-
 
 
 
@@ -97,7 +91,7 @@ class Application(ctk.CTk):
         if file_path:
             self.binarized_image = binerize(file_path)
             save_bin(self.binarized_image, self.file_path)
-            self.show_binarized_image()
+            self.figure_panel.show_binarized_image(bin_image=self.binarized_image, t=self.t, Z=self.Z)
         
     def actualize_figure(self):
         self.figure_panel._render(self.Z, self.t)
@@ -105,6 +99,6 @@ class Application(ctk.CTk):
 
     def erase_figure(self):
         file_path = None
+        self.figure_panel.destroy()
+        print("Figure erased.")
     
-    def show_binarized_image(self):
-        print("Binarized image ready to be displayed.")
