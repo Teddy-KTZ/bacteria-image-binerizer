@@ -33,14 +33,23 @@ class LabelPanel(ctk.CTkFrame):
         self.label.pack()
 
 class SliderPanel(ctk.CTkFrame):
-    def __init__(self, master=None, from_=0, to=100, command=None, **kwargs):
+    def __init__(self, master=None, from_=0, to=100, command=None, label="", **kwargs):
         super().__init__(master)
         self.master = master
+        self.label_text = label
         self.create_widgets(from_, to, command, **kwargs)
 
     def create_widgets(self, from_, to, command=None, **kwargs):
-        self.slider = ctk.CTkSlider(self, from_=from_, to=to, command=command, **kwargs)
+        self.value_label = ctk.CTkLabel(self, text=f"{self.label_text}: 0")
+        self.value_label.pack()
+        self.slider = ctk.CTkSlider(self, from_=from_, to=to, command=self._on_slide, **kwargs)
         self.slider.pack(fill="x", expand=True)
+        self._external_command = command
+
+    def _on_slide(self, value):
+        self.value_label.configure(text=f"{self.label_text}: {int(float(value))}")
+        if self._external_command:
+            self._external_command(value)
 
 
 
@@ -58,7 +67,7 @@ class ImagePanel(ctk.CTkFrame):
             print("No image stack loaded.")
         else :
             # Construction unique de la figure et du canvas
-            self.fig, self.ax = plt.subplots(figsize=(8,8))
+            self.fig, self.ax = plt.subplots(figsize=(8,4))
             self.fig.tight_layout(pad=0)
             self.canvas = FigureCanvasTkAgg(self.fig, master=self)
             self.canvas.get_tk_widget().pack(fill="both", expand=True)
