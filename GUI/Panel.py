@@ -33,14 +33,23 @@ class LabelPanel(ctk.CTkFrame):
         self.label.pack()
 
 class SliderPanel(ctk.CTkFrame):
-    def __init__(self, master=None, from_=0, to=100, command=None, **kwargs):
+    def __init__(self, master=None, from_=0, to=100, command=None, label="", **kwargs):
         super().__init__(master)
         self.master = master
+        self.label_text = label
         self.create_widgets(from_, to, command, **kwargs)
 
     def create_widgets(self, from_, to, command=None, **kwargs):
-        self.slider = ctk.CTkSlider(self, from_=from_, to=to, command=command, **kwargs)
+        self.value_label = ctk.CTkLabel(self, text=f"{self.label_text}: 0")
+        self.value_label.pack()
+        self.slider = ctk.CTkSlider(self, from_=from_, to=to, command=self._on_slide, **kwargs)
         self.slider.pack(fill="x", expand=True)
+        self._external_command = command
+
+    def _on_slide(self, value):
+        self.value_label.configure(text=f"{self.label_text}: {int(float(value))}")
+        if self._external_command:
+            self._external_command(value)
 
 
 
@@ -58,9 +67,9 @@ class ImagePanel(ctk.CTkFrame):
             print("No image stack loaded.")
         else :
             # Construction unique de la figure et du canvas
-            self.fig, self.ax = plt.subplots(figsize=(8,8))
-            self.fig.tight_layout(pad=0)
-            self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+            self.figpan, self.ax = plt.subplots(figsize=(8,4))
+            self.figpan.tight_layout(pad=0)
+            self.canvas = FigureCanvasTkAgg(self.figpan, master=self)
             self.canvas.get_tk_widget().pack(fill="both", expand=True)
 
             print(f"ImagePanel initialized with image_path: {image_path}, Z: {Z}, t: {t}")
@@ -90,22 +99,22 @@ class ImagePanel(ctk.CTkFrame):
                     img = self.stack[t, Z, 0, :, :]
 
                 self.ax.imshow(img, cmap="gray")
-                self.fig.tight_layout(pad=0)
+                self.figpan.tight_layout(pad=0)
                 self.canvas.draw()
                 print(f"Rendered image for Z={self.Z} and t={self.t}")
             else :
                 self._render_2_plots(self.Z, self.t)
 
     def _render_2_plots(self, Z, t):
-        self.fig.clf()  # Clear the current figure
-        self.ax = self.fig.add_subplot(121)  # Add a subplot for the original
+        self.figpan.clf()  # Clear the current figure
+        self.ax = self.figpan.add_subplot(121)  # Add a subplot for the original
         self.ax.imshow(self.stack[self.t, self.Z, 0, :, :], cmap='gray')  # Display the original image
         self.ax.axis('off')  # Hide axes
-        self.fig.tight_layout(pad=0)  # Adjust layout
-        self.ax = self.fig.add_subplot(122)  # Add a subplot for the binarized image
+        self.figpan.tight_layout(pad=0)  # Adjust layout
+        self.ax = self.figpan.add_subplot(122)  # Add a subplot for the binarized image
         self.ax.imshow(self.binarized_image[self.t, self.Z, :, :], cmap='gray')  # Display the binarized image
         self.ax.axis('off')  # Hide axes
-        self.fig.tight_layout(pad=0)  # Adjust layout
+        self.figpan.tight_layout(pad=0)  # Adjust layout
         self.canvas.draw()  # Redraw the canvas
         print(f"Rendered original and binarized images for Z={self.Z} and t={self.t}")
 
@@ -114,17 +123,17 @@ class ImagePanel(ctk.CTkFrame):
         self.binarized_image = bin_image
         self.number_plot = 2
         print("Binarized image ready to be displayed.")
-        self.fig.clf()  # Clear the current figure
+        self.figpan.clf()  # Clear the current figure
         print(f"Shape of original image: {self.stack.shape}")
-        self.ax = self.fig.add_subplot(121)  # Add a subplot for the original
+        self.ax = self.figpan.add_subplot(121)  # Add a subplot for the original
         self.ax.imshow(self.stack[t, Z, 0, :, :], cmap='gray')  # Display the original image
         self.ax.axis('off')  # Hide axes
-        self.fig.tight_layout(pad=0)  # Adjust layout
-        self.ax = self.fig.add_subplot(122)  # Add a subplot for the bin
+        self.figpan.tight_layout(pad=0)  # Adjust layout
+        self.ax = self.figpan.add_subplot(122)  # Add a subplot for the bin
         print(f"Shape of binarized image: {self.binarized_image.shape}")
         self.ax.imshow(self.binarized_image[t, Z, :, :], cmap='gray')  # Display the binarized image
         self.ax.axis('off')  # Hide axes
-        self.fig.tight_layout(pad=0)  # Adjust layout
+        self.figpan.tight_layout(pad=0)  # Adjust layout
         self.canvas.draw()  # Redraw the canvas
         print(f"Displayed binarized image for Z={self.Z} and t={self.t}")
 
