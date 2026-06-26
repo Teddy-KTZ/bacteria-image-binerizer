@@ -5,6 +5,7 @@ from Functions.Import_file import import_file
 from Functions.Binerize import binerize
 from Functions.Save_bin import save_bin
 from Functions.Z_profiles_extraction import extract_Z_profiles, plot_profiles
+from Functions.Contrast_correction import correct_tiff_4d
 
 from GUI.Panel import ButtonPanel, ImagePanel, EntryPanel, LabelPanel, SliderPanel
 
@@ -27,6 +28,7 @@ class Application(ctk.CTk):
         self.import_button = ButtonPanel(self, command=self.import_button_click, text="Import TIFF file")
         self.erase_button = ButtonPanel(self, command=self.erase_figure, text="Erase figure")
 
+        self.correction_brightness = ButtonPanel(self, command=self._correction_brightness, text="Correct Brightness")
         self.Z_slider = SliderPanel(self, from_=0, to=2, command=self._update_Z, label="Z")
         self.displayZ_profile_button = ButtonPanel(self, command=self._display_Z_profile, text="Display Z profile")   
         self.t_slider = SliderPanel(self, from_=0, to=2, command=self._update_t, label="t")
@@ -43,12 +45,21 @@ class Application(ctk.CTk):
 
         self.import_button.grid(row=0, column=0, padx=10, pady=10)
         self.erase_button.grid(row=0, column=1, padx=10, pady=10)
+        self.correction_brightness.grid(row=1, column=0, padx=10, pady=10)
         self.Z_slider.grid(row=1, column=1, padx=10, pady=10)
         self.displayZ_profile_button.grid(row=1, column=2, padx=10, pady=10)
         self.t_slider.grid(row=2, column=1, padx=10, pady=10)
         self.run_button.grid(row=3, column=2, padx=10, pady=10)
         self.info_button.grid(row=5, column=0, padx=10, pady=10)
 
+
+
+    def _correction_brightness(self):
+        input_tiff = self.file_path
+        correct_tiff_4d(input_tiff)
+        self.erase_figure()
+        self.file_path = input_tiff+"_corrected"
+        self.figure_generation()
 
 
     def _update_Z(self, value):
